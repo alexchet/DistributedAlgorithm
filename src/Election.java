@@ -15,9 +15,7 @@ public class Election {
 	
 	public void algorithm(List<Node> nodesArr)
 	{
-		//Helper class
-		Helpers helper = new Helpers();
-		helper.printTree(nodesArr);
+		Helpers.printTree(nodesArr);
 		
 		System.out.println("");
 		System.out.println("---------- Algorithm Actions -----------");
@@ -30,7 +28,7 @@ public class Election {
 		
 		//initialise matrix. 0 = not a neighbour, 1 = neighbour, 2 = sent token, 3 = received token, 4 = decide
 		int[][] tokenMatrix = new int[size][size];
-		tokenMatrix = helper.setNeighboursInMatrix(tokenMatrix, nodesArr);
+		tokenMatrix = Helpers.setNeighboursInMatrix(tokenMatrix, nodesArr);
 		
 		//Set Initiator
 		int initiatorIndex = rand.nextInt(size);
@@ -49,6 +47,9 @@ public class Election {
         System.out.println("[" + sOrderPriorities + "]");
 		System.out.println("");
 		
+		//Counting Iterations
+		int iCount = 0;
+		
 		//Iterate for 100 * N
 		for (int k = 0; k < ITERATION_MULTIPLIER * size; k++) {
 			
@@ -62,8 +63,11 @@ public class Election {
 			//Iterate one for every node to be chosen
 			for (int i = 0; i < countNodes; i++) 
 			{
+				//boolean for action taken
+				boolean actionTaken = false;
+				
 				//Selecting a node that hasn't already run the algorithm in this Iteration of i
-				int process = helper.getNextInteger(nodesAlreadyExecuted, rand.nextInt(size), size);
+				int process = Helpers.getNextInteger(nodesAlreadyExecuted, rand.nextInt(size), size);
 				nodesAlreadyExecuted[i] = process;
 				
 				Node node = nodesArr.get(process);
@@ -77,6 +81,7 @@ public class Election {
 						Node neighbour = nodesArr.get(neighbourIndex);
 						neighbour.addWakeUpTokenBuffer(node);
 						System.out.println(process + " sent wake up token to Neighbour " + neighbourIndex);
+						actionTaken = true;
 					}
 				}
 
@@ -88,6 +93,7 @@ public class Election {
 						Node wakeUpReceived = wakeUpTokenBuffer.next();
 						wakeUpTokenBuffer.remove();
 						System.out.println(process + " received wake up token from Neighbour " + wakeUpReceived.getValue());
+						actionTaken = true;
 						
 						if (!node.getWakeUpSent()) {
 							node.setWakeUpSent(true);
@@ -97,6 +103,7 @@ public class Election {
 								Node neighbour = nodesArr.get(neighbourIndex);
 								neighbour.addWakeUpTokenBuffer(node);
 								System.out.println(process + " sent wake up token to Neighbour " + neighbourIndex);
+								actionTaken = true;
 							}
 						}
 					}
@@ -109,15 +116,16 @@ public class Election {
 					}
 					
 					//Get the row of current node from matrix to receive any incoming messages and checking if its the last 
-					if (helper.countPendingTokens(tokenMatrix[process]) > 0) {
+					if (Helpers.countPendingTokens(tokenMatrix[process]) > 0) {
 						while (tokenBuffer.hasNext() && node.getSilentNeighbour() == null) {
 							Node tokenReceived = tokenBuffer.next();
 							tokenMatrix[process][tokenReceived.getValue()] = 2;
 			
 							System.out.println(process + " received token from neighbour " + tokenReceived.getValue());
+							actionTaken = true;
 							
 							//check for silent neighbour
-							int silentNeighValue = helper.getSilentNeighbour(tokenMatrix[process]);
+							int silentNeighValue = Helpers.getSilentNeighbour(tokenMatrix[process]);
 							if (silentNeighValue > -1) {
 								Node silentNeigh = nodesArr.get(silentNeighValue);
 								node.setSilentNeighbour(silentNeigh);
@@ -129,6 +137,7 @@ public class Election {
 									tokenReceived.getVictor().getValue() < node.getVictor().getValue())) {
 								node.setVictor(tokenReceived.getVictor());
 								System.out.println(process + " updated it's victor to " + node.getVictor().getValue());
+								actionTaken = true;
 							}
 							
 							tokenBuffer.remove();
@@ -141,6 +150,7 @@ public class Election {
 								node.setSentTokenToSilentNeigh();
 								silentNeigh.addTokenBuffer(node);
 								System.out.println(process + " sent token to silent neighbour " + silentNeigh.getValue());
+								actionTaken = true;
 							}
 							
 							//If silent neighbour sent a token back receive the token and decide
@@ -178,10 +188,18 @@ public class Election {
 											}
 										}
 									}
+									actionTaken = true;
 								}
 							}
 						}
 					}
+				}
+				
+				if (actionTaken) {
+					iCount++;
+					System.out.println("");
+					System.out.println("-------- Round " + iCount + " just finished ---------");
+					System.out.println("");
 				}
 			}
 		}
@@ -199,7 +217,7 @@ public class Election {
 		System.out.println("");
 		
 		//Print matrix result for confirmation purposes.
-		helper.printMatrix(tokenMatrix, "election");
+		Helpers.printMatrix(tokenMatrix, "election");
 	}
 
 }

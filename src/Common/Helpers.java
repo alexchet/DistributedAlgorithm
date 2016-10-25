@@ -10,7 +10,7 @@ import java.util.Random;
  * @author Alexander Chetcuti
  *
  */
-public final class Helpers {
+public abstract class Helpers {
 
 	/**
 	 * Constructor of class Helpers.
@@ -26,7 +26,7 @@ public final class Helpers {
 	 * @param nodesArr The array of nodes that are already ordered in a tree.
 	 * @return A token matrix with some of the bits updated to show neighbours of nodes.
 	 */
-	public int[][] setNeighboursInMatrix(int[][] tokenMatrix, List<Node> nodesArr) {
+	public static int[][] setNeighboursInMatrix(int[][] tokenMatrix, List<Node> nodesArr) {
 		int sentTokensSize = tokenMatrix.length;
 		int recieveTokensSize = tokenMatrix[0].length;
 		
@@ -50,7 +50,7 @@ public final class Helpers {
 	 * @param tokens The token array of the current index that needs the silent neighbour
 	 * @return The index of the silent neighbour
 	 */
-	public int getSilentNeighbour(int[] tokens) {
+	public static int getSilentNeighbour(int[] tokens) {
 		int countSilentNiegh = 0;
 		int lastNeighFound = -1;
 		for (int i = 0; i < tokens.length; i++) {
@@ -66,7 +66,7 @@ public final class Helpers {
 		return -1;
 	}
 	
-	public int countPendingTokens(int[] tokens) {
+	public static int countPendingTokens(int[] tokens) {
 		int count = 0;
 		for (int i = 0; i < tokens.length; i++) {
 			if (tokens[i] == 1) {
@@ -85,7 +85,7 @@ public final class Helpers {
 	 * 
 	 * @return The count of tokens being received by the current node.
 	 */
-	public int countReceiving(int[] tokens, int sleepToken, int sentToken) {
+	public static int countReceiving(int[] tokens, int sleepToken, int sentToken) {
 		int countReceiving = 0;
 		for (int i = 0; i < tokens.length; i++) {
 			if (tokens[i] == sleepToken || tokens[i] == sentToken) {
@@ -101,7 +101,7 @@ public final class Helpers {
 	 * 
 	 * @param tokenMatrix The token matrix that needs to be printed.
 	 */
-	public void printMatrix(int[][] tokenMatrix, String legendSetUp)
+	public static void printMatrix(int[][] tokenMatrix, String legendSetUp)
 	{
 		System.out.println("");
 		System.out.println("---------- Token Matrix -----------");
@@ -140,7 +140,7 @@ public final class Helpers {
 	 * 
 	 * @param nodesArr The Node array that contains nodes in a tree format.
 	 */
-	public void printTree(List<Node> nodesArr)
+	public static void printTree(List<Node> nodesArr)
 	{
 		System.out.println("");
 		System.out.println("------------ Tree Structure ------------");
@@ -163,7 +163,7 @@ public final class Helpers {
 	 * @param size The size of the main pool from which the node can be chosen.
 	 * @return The index of the next integer chosen.
 	 */
-	public int getNextInteger(int[] arr, int current, int size)
+	public static int getNextInteger(int[] arr, int current, int size)
 	{	
 		if (find(arr, current)) {
 			Random rand = new Random();
@@ -181,7 +181,7 @@ public final class Helpers {
 	 * @param value The value to be found.
 	 * @return True if this value is found. False if the value has not been found.
 	 */
-	private boolean find(int[] array, int value)
+	private static boolean find(int[] array, int value)
 	{
 		for(int i=0; i<array.length; i++) 
 	         if(array[i] == value)

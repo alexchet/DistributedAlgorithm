@@ -28,9 +28,7 @@ public class Wave {
 	 */
 	public void algorithm(List<Node> nodesArr)
 	{
-		//Helper class
-		Helpers helper = new Helpers();
-		helper.printTree(nodesArr);
+		Helpers.printTree(nodesArr);
 		
 		System.out.println("");
 		System.out.println("---------- Algorithm Actions -----------");
@@ -41,9 +39,12 @@ public class Wave {
 		//Random number
 		Random rand = new Random();
 		
-		//initialise matrix. 0 = not a neighbour, 1 = neighbour, 2 = sent token, 3 = received token, 4 = decide
+		//initialise matrix. 0 = Not a neighbour, 1 = Neighbour, 2 = Received token
 		int[][] tokenMatrix = new int[size][size];
-		tokenMatrix = helper.setNeighboursInMatrix(tokenMatrix, nodesArr);
+		tokenMatrix = Helpers.setNeighboursInMatrix(tokenMatrix, nodesArr);
+		
+		//Counting Iterations
+		int iCount = 0;
 		
 		//Iterate for 100 * N
 		for (int k = 0; k < ITERATION_MULTIPLIER * size; k++) {
@@ -56,10 +57,13 @@ public class Wave {
 			Arrays.fill(nodesAlreadyExecuted, -1);
 			
 			//Iterate one for every node to be chosen
+			//boolean for action taken
+			boolean actionTaken = false;
 			for (int i = 0; i < countNodes; i++) 
 			{
+				
 				//Selecting a node that hasn't already run the algorithm in this Iteration of i
-				int process = helper.getNextInteger(nodesAlreadyExecuted, rand.nextInt(size), size);
+				int process = Helpers.getNextInteger(nodesAlreadyExecuted, rand.nextInt(size), size);
 				nodesAlreadyExecuted[i] = process;
 				
 				Node node = nodesArr.get(process);
@@ -70,7 +74,7 @@ public class Wave {
 					node.setSilentNeighbour(nodesArr.get(node.getNeighbours().get(0).getValue()));
 				}
 				
-				if (helper.countPendingTokens(tokenMatrix[process]) > 0) {
+				if (Helpers.countPendingTokens(tokenMatrix[process]) > 0) {
 					//Get the row of current node from matrix to receive any incoming messages and checking if its the last 
 					while (tokenBuffer.hasNext() && node.getSilentNeighbour() == null) {
 						Node tokenReceived = tokenBuffer.next();
@@ -79,13 +83,14 @@ public class Wave {
 						System.out.println(process + " received token from neighbour " + tokenReceived.getValue());
 						
 						//check for silent neighbour
-						int silentNeighValue = helper.getSilentNeighbour(tokenMatrix[process]);
+						int silentNeighValue = Helpers.getSilentNeighbour(tokenMatrix[process]);
 						if (silentNeighValue > -1) {
 							Node silentNeigh = nodesArr.get(silentNeighValue);
 							node.setSilentNeighbour(silentNeigh);
 						}
 						
 						tokenBuffer.remove();
+						actionTaken = true;
 					}
 					
 					//Check if current node has a silent neighbour to continue algorithm else no action is taken
@@ -95,6 +100,7 @@ public class Wave {
 							node.setSentTokenToSilentNeigh();
 							silentNeigh.addTokenBuffer(node);
 							System.out.println(process + " sent token to silent neighbour " + silentNeigh.getValue());
+							actionTaken = true;
 						}
 						
 						//If silent neighbour sent a token back receive the token and decide
@@ -106,18 +112,28 @@ public class Wave {
 								tokenBuffer.remove();
 								System.out.println(process + " received token from silent neighbour " + node.getSilentNeighbour().getValue());
 								
-								System.out.println(process + " Decided");
+								System.out.println(process + " decided");
+								actionTaken = true;
 							}
 						}
 						
-						//Diffusion part
+						//Diffusion part omitted
 					}
 				}
 			}
+			
+			if (actionTaken) {
+				iCount++;
+				System.out.println("");
+				System.out.println("-------- Round " + iCount + " just finished ---------");
+				System.out.println("");
+			}
 		}
+		
+		System.out.println("Number of rounds: " + iCount);
 
 		//Print matrix result for confirmation purposes.
-		helper.printMatrix(tokenMatrix, "wave");
+		Helpers.printMatrix(tokenMatrix, "wave");
 	}
 
 }
